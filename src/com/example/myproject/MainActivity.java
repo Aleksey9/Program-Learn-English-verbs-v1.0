@@ -14,10 +14,16 @@ public class MainActivity extends Activity {
 	//задаём кол-во групп вопросов
 		static final int count_of_group_questions = 2;
 	
-	static int count;
-	static final private int NUMBER = 0;
-	//static boolean[] ArrQuestion = new boolean [QuestionActivity.count_of_group_questions];
-	static ArrayList <Integer> ArrQuestion = new ArrayList();
+	//кол-во изученных глаголов
+		static int count;
+	
+	//ключ для намерения
+		static final private int NUMBER = 0;
+	
+	//Список неизученных глаголов
+		static ArrayList <Integer> ArrQuestion = new ArrayList();
+	
+	
 	
 	//Создание главной активности
 	@Override
@@ -25,8 +31,9 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		TextView infoTextView = (TextView) findViewById(R.id.textView3);
-		count = 0;
+		count = 0; //кол-во изученных глаголов по умолчанию
 		infoTextView.setText("Количество изученных глаголов: " + count);
+		//по очереди записываем в список номера групп вопросов:
 		for (int i = 0; i < count_of_group_questions; ++i)
 			ArrQuestion.add(i);
 	}
@@ -38,12 +45,14 @@ public class MainActivity extends Activity {
 	
 	//Обработка нажатия на стартовую кнопку
 	public void StartButtonClicked(View v) {
+		TextView infoTextView = (TextView) findViewById(R.id.textView3);
 		//проверка: пустой ли список
 		if (ArrQuestion.size() > 0) {
 			startActivityForResult(new Intent(this, QuestionActivity.class), NUMBER);
 		} else {
 			//выводим: "Вы справились со всеми вопросами"
-			
+			QuestionActivity.showMessage(this, "Поздравляем! Вы справились со всеми вопросами!");
+			//infoTextView.setText("Поздравляем! Вы справились со всеми вопросами!");
 		}
 	}
 	
