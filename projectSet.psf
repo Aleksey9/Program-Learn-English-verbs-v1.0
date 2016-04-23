@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<psf version="2.0">
+<provider id="org.eclipse.egit.core.GitProvider">
+<project reference="1.0,https://github.com/Aleksey9/Program-Learn-English-verbs-v1.0,master,Program_Learn_english_verbs_v1.0"/>
+</provider>
+</psf>
