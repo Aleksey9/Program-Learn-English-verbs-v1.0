@@ -1,5 +1,7 @@
 package com.example.myproject;
 
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -20,14 +22,14 @@ public class QuestionActivity extends Activity{
 	//создаём объект "глобальный вопрос"
 		static Question q1 = new Question();
 		
-	//номер случайного вопроса (пока не задействовано)
-		//static int numberOfRandomQuestion;*/
+	//массив вопросных строк для одной группы вопросов
+		ArrayList <String> q_g = new ArrayList();
 		
 	//номер случайной группы вопросов
 		static int numberOfRandomGroupQuestion;
 		
 	//индекс номера случайной группы вопросов
-		static int numberIndexOfRandomGroupQuestion;
+		static int indexNumberOfRandomGroupQuestion;
 		
 	//кол-во спрошенных вопросов в группе
 		static int CountAskQuestion = 0;
@@ -49,14 +51,18 @@ public class QuestionActivity extends Activity{
 			super.onCreate(savedInstanceState);
 			setContentView(R.layout.activity_second);
 			
-			//генерируем случайный вопрос
-			numberIndexOfRandomGroupQuestion = (int) ((MainActivity.ArrQuestion.size())*Math.random());
+			//генерируем случайный индекс номера группы вопросов
+			indexNumberOfRandomGroupQuestion = (int) ((MainActivity.ArrQuestion.size())*Math.random());
 			//!? это работает правильно только тогда, когда приведение к int отбрасывает дробную часть, а не округляет число
+			
+			//Создаём группу вопросов
+			CreateGroupQuestions();
 			
 			//задаём случайный вопрос
 			AskQuestions();
 	}
-		
+	
+	
 	/*************************************************************************************************************************
 	 * Вывод окна диалога
 	 */
@@ -95,15 +101,18 @@ public class QuestionActivity extends Activity{
 		for (int count = 0; count < q1.N; ++count) {
 			RadioButton Rbtn = (RadioButton) findViewById(Rid[count]);
 			Rbtn.setText(q1.ans[count]);
+			//убираем все отметки на радиокнопках:
+			Rbtn.setChecked(false); //(NEW!)
 		}
+		
 		//--------------------------------------------------------------
 	}
 
 	
 	/*************************************************************************************************************************
-	 * Здесь задаём вопросы	
+	 * Здесь создаём группу вопросов	
 	 */
-	public void AskQuestions() {
+	public void CreateGroupQuestions() {
 		
 		//создаём 7 массивов, в  каждом из которых вопросные строки разных групп вопросов
 		String[] q_1 = getResources().getStringArray(R.array.q_1);
@@ -114,51 +123,35 @@ public class QuestionActivity extends Activity{
 		String[] q_6 = getResources().getStringArray(R.array.q_6);
 		String[] q_7 = getResources().getStringArray(R.array.q_7);
 		
-		//создаём массив вопросных строк для одной группы вопросов
-		String[] q_g = new String[7];
+		numberOfRandomGroupQuestion = MainActivity.ArrQuestion.get(indexNumberOfRandomGroupQuestion);
 		
-		numberOfRandomGroupQuestion = MainActivity.ArrQuestion.get(numberIndexOfRandomGroupQuestion);
-		
-		q_g[0] = q_1[numberOfRandomGroupQuestion];
-		q_g[1] = q_2[numberOfRandomGroupQuestion];
-		q_g[2] = q_3[numberOfRandomGroupQuestion];
-		q_g[3] = q_4[numberOfRandomGroupQuestion];
-		q_g[4] = q_5[numberOfRandomGroupQuestion];
-		q_g[5] = q_6[numberOfRandomGroupQuestion];
-		q_g[6] = q_7[numberOfRandomGroupQuestion];
-		
-		/*???
-		boolean[] trfa = {false, true, true, true, true, true, true};
-		int rand = (int) (6*Math.random());
-		while (!trfa[rand]) {
-			rand = (int) (6*Math.random());
-		}
-		trfa[rand] = false;
-		*/
+		q_g.add(q_1[numberOfRandomGroupQuestion]);
+		q_g.add(q_2[numberOfRandomGroupQuestion]);
+		q_g.add(q_3[numberOfRandomGroupQuestion]);
+		q_g.add(q_4[numberOfRandomGroupQuestion]);
+		q_g.add(q_5[numberOfRandomGroupQuestion]);
+		q_g.add(q_6[numberOfRandomGroupQuestion]);
+		q_g.add(q_7[numberOfRandomGroupQuestion]);
+				
+	}
+	
+	
+	/*************************************************************************************************************************
+	 * Здесь задаём вопросы	
+	 */
+	public void AskQuestions() {
+		//NEW!
+		int rand = (int) (q_g.size()*Math.random());
 		
 		if (CountAskQuestion == 0) {
-			q1 = new Question(q_g[0]);
+			q1 = new Question(q_g.get(0));
 			output();
-		} else if (CountAskQuestion == 1) {
-			q1 = new Question(q_g[1]);
+			q_g.remove(0);
+		} else {
+			q1 = new Question(q_g.get(rand));
 			output();
-		} else if (CountAskQuestion == 2) {
-			q1 = new Question(q_g[2]);
-			output();
-		} else if (CountAskQuestion == 3) {
-			q1 = new Question(q_g[3]);
-			output();
-		} else if (CountAskQuestion == 4) {
-			q1 = new Question(q_g[4]);
-			output();
-		} else if (CountAskQuestion == 5) {
-			q1 = new Question(q_g[5]);
-			output();
-		} else if (CountAskQuestion == 6) {
-			q1 = new Question(q_g[6]);
-			output();
+			q_g.remove(rand);
 		}
-		
 		
 	}
 
@@ -170,8 +163,17 @@ public class QuestionActivity extends Activity{
 	public void buttonClicked(View view) {
 		TextView tv = (TextView) findViewById(R.id.textView1);
 		Button bt = (Button) findViewById(R.id.button1);
+		//массив id-шников радиокнопок
+		int Rid[] = {R.id.radio0, R.id.radio1, R.id.radio2, R.id.radio3, R.id.radio4};
 		//если ответили на вопрос (нажали на кнопку "ДАЛЕЕ")
 		if (AnswerTheQuestion) {
+			
+			//NEW!
+			//разрешаем отвечать в RadioButton
+			for (int count = 0; count < q1.N; ++count) {
+				RadioButton Rbtn = (RadioButton) findViewById(Rid[count]);
+				Rbtn.setClickable(true);
+			}
 			
 			//Меняем кнопку "ДАЛЕЕ" на кнопку "ОТВЕТИТЬ"
 			bt.setText("Ответить");
@@ -186,7 +188,7 @@ public class QuestionActivity extends Activity{
 				// Делаем намерение
 				Intent i = new Intent();
 				if (CorrectAnswers == 7)
-					i.putExtra(KEY, numberIndexOfRandomGroupQuestion);
+					i.putExtra(KEY, indexNumberOfRandomGroupQuestion);
 				else
 					i.putExtra(KEY, -1);
 				setResult(RESULT_OK, i);
@@ -207,45 +209,22 @@ public class QuestionActivity extends Activity{
 			/**------------------------<находим ответ пользователя>------------------------*/
 			int number = 0;
 			
-			//массив id-шников
-			int Rid[] = {R.id.radio0, R.id.radio1, R.id.radio2, R.id.radio3, R.id.radio4};
-			
 			for (int i = 0; i < q1.N; ++i) {
 				RadioButton Rbtn = (RadioButton) findViewById(Rid[i]);
 				if (Rbtn.isChecked())
 					number = i;
 			}
-			/**____________________________________________________________________________*/
-			
-			
-			
-			/**----<проверяем ответ на правильность и выводим соответствующее сообщение>---*/
 			
 			//если ответ правильный
 			if (q1.correctAnswer == number) {
-				
-				//выводим сообщение
-				tv.setText("Правильно!");
-				showMessage(this, "Правильно!");
-				
 				//добавляем этот ответ в счётчик правильных ответов
 				CorrectAnswers += 1;
-				
-			//если ответ непрвильный
-			} else {
-				
-				//выводим сообщение с правильным ответом
-				tv.setText("Неправильно! Правильный ответ " + q1.ans[q1.correctAnswer]);
-				showMessage(this, "Неправильно! Правильный ответ " + q1.ans[q1.correctAnswer]);
-				
 			}
-			//выводим соответствующую картинку для данного кол-ва првильных вопросов
-			
 			/**____________________________________________________________________________*/
 			
 			
 			
-			/**--------<проверяем, последний ли вопрос и запускаем следующий вопрос>-------*/
+			/**----------------------<проверяем, последний ли вопрос>----------------------*/
 			
 			//если вопрос последний, то
 			if (CountAskQuestion == 6) {
@@ -267,11 +246,47 @@ public class QuestionActivity extends Activity{
 				}
 			}
 			
+			/**____________________________________________________________________________*/
+			
+			
+			
+			/**----<проверяем ответ на правильность и выводим соответствующее сообщение>---*/
+			
+			//если ответ правильный
+			if (q1.correctAnswer == number) {
+				
+				//выводим сообщение
+				tv.setText("Правильно!");
+				showMessage(this, "Правильно!");
+				
+			//если ответ непрвильный
+			} else {
+				
+				//выводим сообщение с правильным ответом
+				tv.setText("Неправильно! Правильный ответ " + q1.ans[q1.correctAnswer]);
+				showMessage(this, "Неправильно! Правильный ответ " + q1.ans[q1.correctAnswer]);
+				
+			}
+			//выводим соответствующую картинку для данного кол-ва првильных вопросов
+			
+			/**____________________________________________________________________________*/
+			
+			
+			
+			/**---------<говорим, что ответ на вопрос дан и меняем название кнопки>--------*/
+			
 			//ответ дан на вопрос, ставим значение AnswerTheQuestion в true
 			AnswerTheQuestion = true;
 			
 			//из кнопки "Ответить" делаем кнопку "Далее"
 			bt.setText("Далее");
+			
+			//NEW!
+			//запрещаем отвечать в RadioButton
+			for (int count = 0; count < q1.N; ++count) {
+				RadioButton Rbtn = (RadioButton) findViewById(Rid[count]);
+				Rbtn.setClickable(false);
+			}
 			
 			/**____________________________________________________________________________*/
 			
@@ -279,8 +294,7 @@ public class QuestionActivity extends Activity{
 		
 		
 	}
-
-
+	
 	
 	
 	
